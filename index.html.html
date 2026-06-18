@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machine Learning &amp; AI — Field Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFF2F6;
+    --card:#FFFFFF;
+    --ink:#15191E;
+    --ink-soft:#5B6473;
+    --line:#D8DEE6;
+
+    --blue:#2257D6;
+    --amber:#B8650C;
+    --olive:#5C8A00;
+    --magenta:#BB2178;
+    --violet:#6D28D9;
+
+    --teal1:#0E6B63;
+    --teal2:#0C8F83;
+    --teal3:#10B3A3;
+    --slate:#475569;
+    --red:#C81E3A;
+
+    --radius:5px;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.5;}
+  .page{max-width:880px;margin:0 auto;padding:28px 16px 80px;}
+
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 8px;}
+  h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:28px;line-height:1.14;margin:0 0 12px;letter-spacing:-0.01em;}
+  .lede{color:var(--ink-soft);font-size:14.5px;margin:0 0 18px;max-width:58ch;}
+
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  #filter{flex:1 1 200px;font-family:'Inter',sans-serif;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);color:var(--ink);}
+  #filter:focus{outline:2px solid var(--blue);outline-offset:1px;}
+  .btns{display:flex;gap:8px;}
+  .btns button{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);padding:0 12px;border-radius:var(--radius);cursor:pointer;}
+  .btns button:hover{border-color:var(--ink-soft);color:var(--ink);}
+  .btns button:focus-visible{outline:2px solid var(--blue);}
+
+  .legend{display:flex;flex-wrap:wrap;gap:10px 16px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:28px;}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-soft);}
+  .legend-item i{width:9px;height:9px;border-radius:2px;display:inline-block;flex:none;}
+
+  /* ---- root node + trunk ---- */
+  .tree-root{display:inline-flex;align-items:baseline;gap:10px;background:var(--ink);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14.5px;padding:10px 18px;border-radius:var(--radius);}
+  .tree-root .sub{font-family:'Inter',sans-serif;font-weight:400;font-size:11.5px;color:#C7CCD4;}
+  .trunk{width:2px;height:16px;background:var(--line);margin-left:14px;}
+
+  /* ---- list resets ---- */
+  ul.tree, ul.lvl2-list, ul.lvl3-list{list-style:none;margin:0;padding:0;}
+
+  /* ---- depth 1: branches ---- */
+  ul.tree{border-left:2px solid var(--line);margin-left:14px;padding-left:20px;}
+  li.lvl1{position:relative;padding:11px 0;}
+  li.lvl1::before{content:"";position:absolute;top:19px;left:-20px;width:20px;height:0;border-top:2px solid var(--line);}
+  .lvl1-label{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:3px;}
+  .lvl1-label .dot{width:10px;height:10px;border-radius:2px;background:var(--ink);flex:none;}
+  .lvl1-label h2{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin:0;}
+  .lvl1-label .sub{font-size:12px;color:var(--ink-soft);font-weight:400;}
+
+  /* ---- depth 2: category (collapsible) ---- */
+  ul.lvl2-list{border-left:1.5px solid var(--line);margin:10px 0 0 12px;padding:0 0 0 18px;}
+  li.lvl2{position:relative;padding:9px 0;}
+  li.lvl2::before{content:"";position:absolute;top:17px;left:-18px;width:18px;height:0;border-top:1.5px solid var(--line);}
+
+  details.cat{margin:0;}
+  details.cat>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 0;}
+  details.cat>summary::-webkit-details-marker{display:none;}
+  .s-main{display:flex;flex-direction:column;gap:1px;}
+  .s-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:7px;}
+  .s-title .dot{width:8px;height:8px;border-radius:50%;background:var(--accent,var(--ink));flex:none;}
+  .s-hint{font-size:11.5px;color:var(--ink-soft);padding-left:15px;}
+  .chev{flex:none;width:16px;text-align:center;color:var(--ink-soft);transition:transform .15s ease;}
+  details.cat[open]>summary .chev{transform:rotate(90deg);}
+  .cat-body{padding-top:9px;}
+
+  /* ---- depth 3: bucket ---- */
+  ul.lvl3-list{border-left:1px solid var(--line);margin:8px 0 0 8px;padding:0 0 0 14px;}
+  li.lvl3{position:relative;padding:6px 0;}
+  li.lvl3::before{content:"";position:absolute;top:13px;left:-14px;width:14px;height:0;border-top:1px solid var(--line);}
+  .b-label{font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:2px;}
+  .b-label::before{content:"";width:6px;height:6px;background:var(--accent,var(--ink));border-radius:50%;flex:none;}
+  .b-hint{font-size:11.5px;color:var(--ink-soft);margin:0 0 6px;padding-left:12px;}
+  .b-hint.flush{padding-left:0;}
+
+  /* ---- chips (leaf content, no connector lines) ---- */
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.4;padding:4px 9px;background:var(--paper);border:1px solid var(--line);border-radius:4px;color:var(--ink);white-space:nowrap;transition:opacity .12s ease, border-color .12s ease;}
+  .chip.dim{opacity:.22;}
+  .chip.match{border-color:var(--accent,var(--ink));border-width:1.5px;}
+
+  /* ---- accent colors ---- */
+  .node--blue{--accent:var(--blue);}
+  .node--amber{--accent:var(--amber);}
+  .node--olive{--accent:var(--olive);}
+  .node--magenta{--accent:var(--magenta);}
+  .node--violet{--accent:var(--violet);}
+  .node--teal1{--accent:var(--teal1);}
+  .node--teal2{--accent:var(--teal2);}
+  .node--teal3{--accent:var(--teal3);}
+  .node--slate{--accent:var(--slate);}
+  .node--red{--accent:var(--red);}
+
+  .note{font-size:12.5px;color:var(--ink-soft);background:var(--card);border:1px solid var(--line);border-left:3px solid var(--slate);padding:9px 12px;border-radius:4px;margin:6px 0 4px;}
+  .spectrum{display:flex;align-items:center;gap:8px;margin:4px 0 4px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
+  .spectrum .bar{flex:1;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--teal1),var(--teal2),var(--teal3));max-width:160px;}
+  .work-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:var(--accent,var(--ink));margin-right:5px;}
+
+  footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-soft);}
+
+  @media (max-width:480px){
+    h1{font-size:23px;}
+    ul.tree{margin-left:8px;padding-left:14px;}
+    li.lvl1::before{left:-14px;width:14px;}
+    ul.lvl2-list{margin-left:8px;padding-left:13px;}
+    li.lvl2::before{left:-13px;width:13px;}
+    ul.lvl3-list{margin-left:6px;padding-left:11px;}
+    li.lvl3::before{left:-11px;width:11px;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <p class="eyebrow">A field guide</p>
+    <h1>Machine Learning &amp; AI, mapped</h1>
+    <p class="lede">One root, four branches. Tap a category to open it, or search for any algorithm below — the tree opens automatically wherever it lives.</p>
+
+    <div class="controls">
+      <input id="filter" type="text" placeholder="Find an algorithm or model…" autocomplete="off">
+      <div class="btns">
+        <button id="expandAll" type="button">Expand all</button>
+        <button id="collapseAll" type="button">Collapse all</button>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span class="legend-item"><i style="background:var(--blue)"></i>Supervised</span>
+      <span class="legend-item"><i style="background:var(--amber)"></i>Unsupervised</span>
+      <span class="legend-item"><i style="background:var(--olive)"></i>Semi-supervised</span>
+      <span class="legend-item"><i style="background:var(--magenta)"></i>Reinforcement</span>
+      <span class="legend-item"><i style="background:var(--violet)"></i>Deep learning</span>
+      <span class="legend-item"><i style="background:var(--teal2)"></i>Applied AI work</span>
+      <span class="legend-item"><i style="background:var(--slate)"></i>Statistics &amp; experimentation</span>
+      <span class="legend-item"><i style="background:var(--red)"></i>MLOps &amp; evaluation</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="tree-root">Machine Learning &amp; AI <span class="sub">— the whole field</span></div>
+    <div class="trunk"></div>
+
+    <ul class="tree">
+
+      <!-- ===================== BRANCH I: MACHINE LEARNING ===================== -->
+      <li class="lvl1">
+        <div class="lvl1-label"><span class="dot"></span><h2>Machine Learning</h2><span class="sub">by learning paradigm</span></div>
+        <ul class="lvl2-list">
+
+          <li class="lvl2">
+            <details class="cat node--blue" open>
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Supervised Learning</span>
+                  <span class="s-hint">trains on labeled examples (input → known output)</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <ul class="lvl3-list">
+                  <li class="lvl3">
+                    <div class="b-label">Regression</div>
+                    <p class="b-hint">predicts a continuous number, e.g. price, temperature</p>
+                    <div class="chips">
+                      <span class="chip">Linear Regression</span>
+                      <span class="chip">Polynomial Regression</span>
+                      <span class="chip">Ridge Regression</span>
+                      <span class="chip">Lasso Regression</span>
+                      <span class="chip">Elastic Net</span>
+                      <span class="chip">Decision Tree Regressor</span>
+                      <span class="chip">Random Forest Regressor</span>
+                      <span class="chip">Gradient Boosting (XGBoost / LightGBM / CatBoost)</span>
+                      <span class="chip">Support Vector Regression (SVR)</span>
+                      <span class="chip">KNN Regression</span>
+                      <span class="chip">Neural Network Regression</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Classification</div>
+                    <p class="b-hint">predicts a discrete category, e.g. spam / not spam</p>
+                    <div class="chips">
+                      <span class="chip">Logistic Regression</span>
+                      <span class="chip">Decision Tree</span>
+                      <span class="chip">Random Forest</span>
+                      <span class="chip">Naive Bayes</span>
+                      <span class="chip">K-Nearest Neighbors (KNN)</span>
+                      <span class="chip">Support Vector Machine (SVM)</span>
+                      <span class="chip">Gradient Boosting (XGBoost / LightGBM / CatBoost)</span>
+                      <span class="chip">Neural Network Classifier</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--amber">
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Unsupervised Learning</span>
+                  <span class="s-hint">finds structure in data with no labels at all</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <ul class="lvl3-list">
+                  <li class="lvl3">
+                    <div class="b-label">Clustering</div>
+                    <p class="b-hint">groups similar data points together</p>
+                    <div class="chips">
+                      <span class="chip">K-Means</span>
+                      <span class="chip">Hierarchical Clustering</span>
+                      <span class="chip">DBSCAN</span>
+                      <span class="chip">Mean Shift</span>
+                      <span class="chip">Gaussian Mixture Model (GMM)</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Dimensionality Reduction</div>
+                    <p class="b-hint">compresses many features into fewer, denser ones</p>
+                    <div class="chips">
+                      <span class="chip">PCA</span>
+                      <span class="chip">t-SNE</span>
+                      <span class="chip">UMAP</span>
+                      <span class="chip">Autoencoders</span>
+                      <span class="chip">Linear Discriminant Analysis (LDA)</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Association Rule Learning</div>
+                    <p class="b-hint">finds items that tend to co-occur, e.g. market-basket analysis</p>
+                    <div class="chips">
+                      <span class="chip">Apriori</span>
+                      <span class="chip">FP-Growth</span>
+                      <span class="chip">Eclat</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--olive">
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Semi-Supervised Learning</span>
+                  <span class="s-hint">a small labeled set plus a much larger unlabeled set</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <p class="b-hint flush">used when labeling everything is too expensive, e.g. labeling 5% of medical scans</p>
+                <div class="chips">
+                  <span class="chip">Self-Training</span>
+                  <span class="chip">Pseudo-Labeling</span>
+                  <span class="chip">Label Propagation</span>
+                  <span class="chip">Co-Training</span>
+                </div>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--magenta">
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Reinforcement Learning</span>
+                  <span class="s-hint">learns by trial and error, guided by reward signals</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <ul class="lvl3-list">
+                  <li class="lvl3">
+                    <div class="b-label">Value-Based</div>
+                    <p class="b-hint">learns how good each action is, then picks the best one</p>
+                    <div class="chips">
+                      <span class="chip">Q-Learning</span>
+                      <span class="chip">SARSA</span>
+                      <span class="chip">Deep Q-Network (DQN)</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Policy-Based</div>
+                    <p class="b-hint">learns the action-picking strategy directly</p>
+                    <div class="chips">
+                      <span class="chip">REINFORCE</span>
+                      <span class="chip">Policy Gradient</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Actor-Critic</div>
+                    <p class="b-hint">learns a policy and a value estimate together</p>
+                    <div class="chips">
+                      <span class="chip">A2C</span>
+                      <span class="chip">A3C</span>
+                      <span class="chip">PPO</span>
+                      <span class="chip">DDPG</span>
+                      <span class="chip">SAC</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </details>
+          </li>
+
+        </ul>
+      </li>
+
+      <!-- ===================== BRANCH II: DEEP LEARNING ===================== -->
+      <li class="lvl1">
+        <div class="lvl1-label"><span class="dot"></span><h2>Deep Learning &amp; Neural Networks</h2><span class="sub">by architecture</span></div>
+        <ul class="lvl2-list">
+
+          <li class="lvl2">
+            <details class="cat node--violet" open>
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Feedforward Network (MLP)</span>
+                  <span class="s-hint">the basic layered network — good for tabular data</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <div class="chips">
+                  <span class="chip">Perceptron</span>
+                  <span class="chip">Multilayer Perceptron (MLP)</span>
+                </div>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--violet">
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Convolutional Network (CNN)</span>
+                  <span class="s-hint">for images and other spatial / grid data</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <div class="chips">
+                  <span class="chip">LeNet</span>
+                  <span class="chip">AlexNet</span>
+                  <span class="chip">VGG</span>
+                  <span class="chip">ResNet</span>
+                  <span class="chip">Inception</span>
+                  <span class="chip">EfficientNet</span>
+                </div>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--violet">
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Recurrent Network (RNN)</span>
+                  <span class="s-hint">for sequences, where order matters</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <div class="chips">
+                  <span class="chip">Vanilla RNN</span>
+                  <span class="chip">LSTM</span>
+                  <span class="chip">GRU</span>
+                </div>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--violet" open>
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Transformer</span>
+                  <span class="s-hint">attention-based — behind today's large models</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <div class="chips">
+                  <span class="chip">BERT (encoder-only)</span>
+                  <span class="chip">GPT (decoder-only)</span>
+                  <span class="chip">T5 (encoder-decoder)</span>
+                  <span class="chip">Vision Transformer (ViT)</span>
+                </div>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--violet">
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Generative Adversarial Network (GAN)</span>
+                  <span class="s-hint">a generator and a discriminator trained against each other</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <div class="chips">
+                  <span class="chip">DCGAN</span>
+                  <span class="chip">CycleGAN</span>
+                  <span class="chip">StyleGAN</span>
+                </div>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--violet">
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Autoencoder</span>
+                  <span class="s-hint">compresses input, then reconstructs it</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <div class="chips">
+                  <span class="chip">Vanilla Autoencoder</span>
+                  <span class="chip">Variational Autoencoder (VAE)</span>
+                  <span class="chip">Denoising Autoencoder</span>
+                </div>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--violet">
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Diffusion Model</span>
+                  <span class="s-hint">generates by learning to reverse a noising process</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <div class="chips">
+                  <span class="chip">DDPM</span>
+                  <span class="chip">Stable Diffusion</span>
+                  <span class="chip">Imagen</span>
+                </div>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--violet">
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Graph Neural Network (GNN)</span>
+                  <span class="s-hint">for data shaped like a graph — social networks, molecules</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <div class="chips">
+                  <span class="chip">GCN</span>
+                  <span class="chip">GAT</span>
+                  <span class="chip">GraphSAGE</span>
+                </div>
+              </div>
+            </details>
+          </li>
+
+        </ul>
+      </li>
+
+      <!-- ===================== BRANCH III: APPLIED AI WORK ===================== -->
+      <li class="lvl1">
+        <div class="lvl1-label"><span class="dot"></span><h2>Applied AI Work</h2><span class="sub">three kinds of work, foundational → applied</span></div>
+        <div class="spectrum"><span>foundational</span><span class="bar"></span><span>applied</span></div>
+        <ul class="lvl2-list">
+
+          <li class="lvl2">
+            <details class="cat node--teal1" open>
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="work-num">1</span>Building Models From Scratch</span>
+                  <span class="s-hint">designing an architecture and training it from random weights</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <p class="b-hint flush">needs large datasets and heavy compute — this is how the foundation models themselves get made</p>
+                <div class="chips">
+                  <span class="chip">Architecture design</span>
+                  <span class="chip">Data collection &amp; curation</span>
+                  <span class="chip">Distributed / large-scale training</span>
+                  <span class="chip">Loss &amp; objective design</span>
+                  <span class="chip">Evaluation &amp; benchmarking</span>
+                </div>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--teal2" open>
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="work-num">2</span>Fine-Tuning Existing Models</span>
+                  <span class="s-hint">adapting a pretrained model to a new task or domain</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <ul class="lvl3-list">
+                  <li class="lvl3">
+                    <div class="b-label">Full &amp; Parameter-Efficient Fine-Tuning</div>
+                    <div class="chips">
+                      <span class="chip">Full Fine-Tuning</span>
+                      <span class="chip">LoRA</span>
+                      <span class="chip">QLoRA</span>
+                      <span class="chip">Adapters</span>
+                      <span class="chip">Prefix Tuning</span>
+                      <span class="chip">Prompt Tuning</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Alignment Tuning</div>
+                    <p class="b-hint">shapes how a model behaves, not just what it knows</p>
+                    <div class="chips">
+                      <span class="chip">Instruction Tuning</span>
+                      <span class="chip">RLHF</span>
+                      <span class="chip">DPO</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--teal3" open>
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="work-num">3</span>Building Systems Using AI</span>
+                  <span class="s-hint">wiring a model into a real application — AI engineering</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <ul class="lvl3-list">
+                  <li class="lvl3">
+                    <div class="b-label">Retrieval &amp; Memory</div>
+                    <div class="chips">
+                      <span class="chip">Retrieval-Augmented Generation (RAG)</span>
+                      <span class="chip">Embeddings</span>
+                      <span class="chip">Vector Databases (Pinecone / Weaviate / Chroma / FAISS / Qdrant)</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Orchestration &amp; Action</div>
+                    <div class="chips">
+                      <span class="chip">Prompt Engineering</span>
+                      <span class="chip">Agents &amp; Tool Use</span>
+                      <span class="chip">Orchestration Frameworks (LangChain / LlamaIndex)</span>
+                      <span class="chip">Model Context Protocol (MCP)</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </details>
+          </li>
+
+        </ul>
+      </li>
+
+      <!-- ===================== BRANCH IV: STATISTICS & EXPERIMENTATION ===================== -->
+      <li class="lvl1">
+        <div class="lvl1-label"><span class="dot"></span><h2>Statistics &amp; Experimentation</h2><span class="sub">a separate branch, not a part of ML</span></div>
+        <p class="note">ML asks "can I predict this." Statistics asks "is this difference real, and how confident should I be." They share some math but aim at different questions — that's why this sits beside ML rather than inside it.</p>
+        <ul class="lvl2-list">
+
+          <li class="lvl2">
+            <details class="cat node--slate" open>
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Experimental Design / A-B Testing</span>
+                  <span class="s-hint">testing whether a change actually causes a measured difference</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <ul class="lvl3-list">
+                  <li class="lvl3">
+                    <div class="b-label">Core Significance Tests</div>
+                    <p class="b-hint">checks whether an observed difference is unlikely to be due to chance</p>
+                    <div class="chips">
+                      <span class="chip">A/B Testing</span>
+                      <span class="chip">Hypothesis Testing</span>
+                      <span class="chip">t-test</span>
+                      <span class="chip">Chi-Square Test</span>
+                      <span class="chip">ANOVA</span>
+                      <span class="chip">Mann-Whitney U Test</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Planning &amp; Validity</div>
+                    <p class="b-hint">decides how the experiment should be run before it starts</p>
+                    <div class="chips">
+                      <span class="chip">Power Analysis</span>
+                      <span class="chip">Sample Size Calculation</span>
+                      <span class="chip">Randomization</span>
+                      <span class="chip">Multiple Testing Correction (Bonferroni / FDR)</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Sequential &amp; Adaptive Methods</div>
+                    <p class="b-hint">lets the test adapt or stop early as data comes in</p>
+                    <div class="chips">
+                      <span class="chip">Sequential Testing</span>
+                      <span class="chip">Bayesian A/B Testing</span>
+                      <span class="chip">Multi-Armed Bandits</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--slate" open>
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Inferential Statistics</span>
+                  <span class="s-hint">quantifying uncertainty from a sample about the whole population</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <ul class="lvl3-list">
+                  <li class="lvl3">
+                    <div class="b-label">Estimation</div>
+                    <div class="chips">
+                      <span class="chip">Confidence Intervals</span>
+                      <span class="chip">Maximum Likelihood Estimation (MLE)</span>
+                      <span class="chip">Point Estimation</span>
+                      <span class="chip">Method of Moments</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Resampling</div>
+                    <p class="b-hint">rebuilds the sampling distribution by reusing the data itself</p>
+                    <div class="chips">
+                      <span class="chip">Bootstrapping</span>
+                      <span class="chip">Jackknife</span>
+                      <span class="chip">Permutation Tests</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Bayesian Inference</div>
+                    <p class="b-hint">updates a belief about a parameter as new evidence arrives</p>
+                    <div class="chips">
+                      <span class="chip">Bayes' Theorem</span>
+                      <span class="chip">Prior / Posterior Updating</span>
+                      <span class="chip">Markov Chain Monte Carlo (MCMC)</span>
+                      <span class="chip">Bayesian Credible Intervals</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--slate" open>
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Causal Inference</span>
+                  <span class="s-hint">estimating cause-and-effect, not just correlation</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <ul class="lvl3-list">
+                  <li class="lvl3">
+                    <div class="b-label">Experimental</div>
+                    <p class="b-hint">the gold standard — random assignment removes most confounding by design</p>
+                    <div class="chips">
+                      <span class="chip">Randomized Controlled Trials (RCTs)</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Quasi-Experimental</div>
+                    <p class="b-hint">estimates a causal effect when you can't randomize</p>
+                    <div class="chips">
+                      <span class="chip">Propensity Score Matching</span>
+                      <span class="chip">Difference-in-Differences</span>
+                      <span class="chip">Regression Discontinuity</span>
+                      <span class="chip">Instrumental Variables</span>
+                      <span class="chip">Synthetic Control</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Causal Modeling</div>
+                    <div class="chips">
+                      <span class="chip">Causal Graphs / DAGs</span>
+                      <span class="chip">Structural Causal Models</span>
+                      <span class="chip">Do-Calculus</span>
+                      <span class="chip">Mediation Analysis</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </details>
+          </li>
+
+        </ul>
+      </li>
+
+      <!-- ===================== BRANCH V: MLOPS & EVALUATION ===================== -->
+      <li class="lvl1">
+        <div class="lvl1-label"><span class="dot"></span><h2>MLOps &amp; Evaluation</h2><span class="sub">shipping, monitoring, and judging models in production</span></div>
+        <ul class="lvl2-list">
+
+          <li class="lvl2">
+            <details class="cat node--red" open>
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Model Deployment &amp; Serving</span>
+                  <span class="s-hint">getting a trained model into a live, usable endpoint</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <ul class="lvl3-list">
+                  <li class="lvl3">
+                    <div class="b-label">Serving Patterns</div>
+                    <div class="chips">
+                      <span class="chip">REST / gRPC APIs</span>
+                      <span class="chip">Batch Inference</span>
+                      <span class="chip">Real-Time Inference</span>
+                      <span class="chip">Edge / On-Device Deployment</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Release Strategies</div>
+                    <p class="b-hint">controls how a new model version reaches real traffic</p>
+                    <div class="chips">
+                      <span class="chip">Canary Deployment</span>
+                      <span class="chip">Shadow Deployment</span>
+                      <span class="chip">Blue-Green Deployment</span>
+                      <span class="chip">A/B Rollout</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Infrastructure</div>
+                    <div class="chips">
+                      <span class="chip">Docker</span>
+                      <span class="chip">Kubernetes</span>
+                      <span class="chip">Model Registry</span>
+                      <span class="chip">Model Versioning</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--red" open>
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Pipelines &amp; Infrastructure</span>
+                  <span class="s-hint">the plumbing that takes a model from code to production reliably</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <div class="chips">
+                  <span class="chip">CI/CD for ML</span>
+                  <span class="chip">Feature Store</span>
+                  <span class="chip">Data Versioning (DVC)</span>
+                  <span class="chip">Experiment Tracking (MLflow / Weights &amp; Biases)</span>
+                  <span class="chip">Workflow Orchestration (Airflow / Kubeflow)</span>
+                </div>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--red" open>
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Monitoring &amp; Observability</span>
+                  <span class="s-hint">watching a live model for problems before users notice</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <ul class="lvl3-list">
+                  <li class="lvl3">
+                    <div class="b-label">Drift Detection</div>
+                    <p class="b-hint">flags when live data no longer looks like training data</p>
+                    <div class="chips">
+                      <span class="chip">Data Drift</span>
+                      <span class="chip">Concept Drift</span>
+                      <span class="chip">Feature Drift</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Operational Monitoring</div>
+                    <div class="chips">
+                      <span class="chip">Latency &amp; Throughput</span>
+                      <span class="chip">Error Rate</span>
+                      <span class="chip">Resource Utilization</span>
+                      <span class="chip">Alerting</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Model Behavior</div>
+                    <div class="chips">
+                      <span class="chip">Prediction Distribution Monitoring</span>
+                      <span class="chip">Logging &amp; Tracing</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </details>
+          </li>
+
+          <li class="lvl2">
+            <details class="cat node--red" open>
+              <summary>
+                <span class="s-main">
+                  <span class="s-title"><span class="dot"></span>Evaluation &amp; Testing</span>
+                  <span class="s-hint">measuring whether a model is actually good, before and after release</span>
+                </span>
+                <span class="chev">▸</span>
+              </summary>
+              <div class="cat-body">
+                <ul class="lvl3-list">
+                  <li class="lvl3">
+                    <div class="b-label">Offline Metrics</div>
+                    <p class="b-hint">scored against a held-out dataset, before anything ships</p>
+                    <div class="chips">
+                      <span class="chip">Accuracy</span>
+                      <span class="chip">Precision / Recall</span>
+                      <span class="chip">F1 Score</span>
+                      <span class="chip">AUC-ROC</span>
+                      <span class="chip">RMSE / MAE</span>
+                      <span class="chip">Perplexity</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">Model &amp; Behavioral Testing</div>
+                    <div class="chips">
+                      <span class="chip">Unit Tests for ML</span>
+                      <span class="chip">Behavioral / Invariance Testing</span>
+                      <span class="chip">Bias &amp; Fairness Auditing</span>
+                    </div>
+                  </li>
+                  <li class="lvl3">
+                    <div class="b-label">LLM-Specific Evaluation</div>
+                    <p class="b-hint">the newer toolkit, built for models that generate open-ended text</p>
+                    <div class="chips">
+                      <span class="chip">Benchmark Suites</span>
+                      <span class="chip">Human Evaluation</span>
+                      <span class="chip">LLM-as-Judge</span>
+                      <span class="chip">Red Teaming</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </details>
+          </li>
+
+        </ul>
+      </li>
+
+    </ul>
+  </main>
+
+  <footer>Search filters every algorithm and model name across the whole tree and opens any branch with a match.</footer>
+</div>
+
+<script>
+  const allDetails = Array.from(document.querySelectorAll('details.cat'));
+  document.getElementById('expandAll').addEventListener('click', () => allDetails.forEach(d => d.open = true));
+  document.getElementById('collapseAll').addEventListener('click', () => allDetails.forEach(d => d.open = false));
+
+  const filterInput = document.getElementById('filter');
+  const allChips = Array.from(document.querySelectorAll('.chip'));
+
+  filterInput.addEventListener('input', () => {
+    const q = filterInput.value.trim().toLowerCase();
+    if (!q) { allChips.forEach(c => c.classList.remove('dim','match')); return; }
+    allChips.forEach(chip => {
+      const text = chip.textContent.toLowerCase();
+      const isMatch = text.includes(q);
+      chip.classList.toggle('dim', !isMatch);
+      chip.classList.toggle('match', isMatch);
+      if (isMatch) {
+        const d = chip.closest('details.cat');
+        if (d) d.open = true;
+      }
+    });
+  });
+</script>
+</body>
+</html>
